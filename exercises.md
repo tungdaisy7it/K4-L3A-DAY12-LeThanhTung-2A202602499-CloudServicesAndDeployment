@@ -209,4 +209,27 @@ Ghi lại **một** lỗi bạn gặp khi deploy lên cloud (build fail, health 
 timeout, sai REDIS_URL, app không đọc `$PORT`...): thông báo lỗi là gì, bạn
 tìm ra nguyên nhân bằng cách nào, và sửa ra sao?
 
-> *Câu trả lời của bạn*
+> **Lỗi:** deploy lên Railway báo "Deployment successful", `/health` trả
+> `200 {"status":"ok"}`, nhưng `/ready` và mọi lệnh `/ask` có API key đều trả
+> `HTTP/1.1 500 Internal Server Error` (chạy 15 lần: toàn `500`).
+>
+> **Tìm nguyên nhân:**
+> - `/health` 200 nghĩa là process sống, `$PORT` và Dockerfile đều ổn — lỗi nằm
+>   ở dependency. `/ask` không có key vẫn đúng 401, còn có key thì 500 ngay ở
+>   bước rate limiter — bước đầu tiên chạm Redis.
+> - Điểm mấu chốt: `/ready` trả **500 trong ~0.4 giây**, không phải **503**.
+>   Code của mình: Redis không trả lời → `ping()` bắt exception → 503. Được 500
+>   nghĩa là lỗi xảy ra *trước* khi kịp ping, lúc `redis.from_url(REDIS_URL)`
+>   dựng client — tức giá trị `REDIS_URL` không phải một URL Redis hợp lệ.
+> - Mở tab Variables: mình đã điền `REDIS_URL=${{REDIS_URL}}` — thiếu tên
+>   service nên Railway tìm một shared variable không tồn tại và thay bằng chuỗi
+>   rỗng. Nhìn lại canvas thì còn tệ hơn: project **chưa hề có service Redis**,
+>   chỉ có service app.
+>
+> **Sửa:** tạo service Redis (Create → Database → Redis), dùng Raw Editor đặt
+> `REDIS_URL=${{Redis.REDIS_URL}}` (đúng cú pháp `${{<tên service>.<biến>}}`),
+> redeploy. Kết quả: `/ready` → `200 {"status":"ready","redis":true}`, `/ask`
+> → 200, gọi 15 lần → `200` × 10 rồi `429` × 5. Mình cũng thêm log
+> `service_started` in ra `REDIS_URL` đã che mật khẩu, để lần sau nhìn Deploy
+> Logs là biết app đang trỏ đi đâu. Bài học: tách liveness/readiness không chỉ
+> để orchestrator dùng — mã lỗi khác nhau của chúng giúp mình khoanh vùng lỗi.
