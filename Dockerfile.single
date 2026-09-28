@@ -1,0 +1,13 @@
+# Bản 1 stage ban đầu — chỉ giữ lại để so sánh dung lượng (exercises câu 3).
+# KHÔNG dùng để deploy:  docker build -f Dockerfile.single -t agent:single .
+FROM python:3.11
+
+WORKDIR /app
+
+COPY . .
+
+RUN pip install -r requirements.txt
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
