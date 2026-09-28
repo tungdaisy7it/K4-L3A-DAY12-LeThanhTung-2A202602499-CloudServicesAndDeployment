@@ -47,9 +47,6 @@ class Settings(BaseSettings):
     rate_limit_per_minute: int = 10
     monthly_budget_usd: float = 10.0
     log_level: str = "INFO"
-    # LLM thật qua OpenRouter — không set thì dùng mock LLM (xem app/llm.py)
-    openrouter_api_key: str | None = None
-    openrouter_model: str = "nvidia/nemotron-3.5-lightning:free"
 
 
 @lru_cache(maxsize=1)

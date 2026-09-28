@@ -34,8 +34,6 @@ Ghi tên biến và **nguồn giá trị**, không ghi giá trị:
 | `RATE_LIMIT_PER_MINUTE` | ✅ | 10 |
 | `MONTHLY_BUDGET_USD` | ✅ | 10.0 |
 | `LOG_LEVEL` | ✅ | INFO |
-| `OPENROUTER_API_KEY` | ✅ | đặt trong dashboard; LLM thật qua OpenRouter, thiếu thì dùng mock LLM |
-| `OPENROUTER_MODEL` | — | không set, dùng mặc định `nvidia/nemotron-3.5-lightning:free` |
 
 ## Lệnh Kiểm Tra
 
