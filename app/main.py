@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from functools import lru_cache
+from urllib.parse import urlsplit, urlunsplit
 
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
@@ -53,11 +54,28 @@ def get_cost_guard() -> CostGuard:
     return CostGuard(get_redis_client(), get_settings().monthly_budget_usd)
 
 
+def _redact_url(url: str) -> str:
+    """Che mật khẩu trong URL để log được mà không lộ secret.
+
+    Giúp chẩn đoán REDIS_URL sai trên cloud: nhìn log là biết app đang trỏ đi đâu.
+    """
+    parts = urlsplit(url)
+    if not parts.password:
+        return url or "(rỗng)"
+    netloc = parts.netloc.replace(f":{parts.password}@", ":***@")
+    return urlunsplit(parts._replace(netloc=netloc))
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """CHO SẴN — chạy lúc app khởi động và lúc tắt."""
     lifecycle.install()
-    log_event("service_started", service=SERVICE_NAME, version=SERVICE_VERSION)
+    log_event(
+        "service_started",
+        service=SERVICE_NAME,
+        version=SERVICE_VERSION,
+        redis_url=_redact_url(get_settings().redis_url),
+    )
     yield
     log_event("service_stopped", service=SERVICE_NAME)
 
