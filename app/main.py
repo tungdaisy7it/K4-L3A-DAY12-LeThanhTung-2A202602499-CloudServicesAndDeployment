@@ -20,12 +20,11 @@ from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from utils.mock_llm import ask_llm
-
 from .auth import verify_api_key
 from .config import get_settings
 from .cost_guard import CostGuard
 from .lifecycle import lifecycle
+from .llm import ask_llm
 from .logging_utils import log_event
 from .rate_limiter import RateLimiter
 from .store import ConversationStore, get_redis_client
