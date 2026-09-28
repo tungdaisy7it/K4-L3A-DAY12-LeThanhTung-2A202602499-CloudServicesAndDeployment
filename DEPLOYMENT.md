@@ -10,7 +10,7 @@
 
 | Mục | Nội dung |
 |-----|----------|
-| Họ và tên | Lê Thành Tùng |
+| Họ và tên | Lê Thanh Tùng |
 | Mã học viên | 2A202602499 |
 | Repo | https://github.com/tungdaisy7it/K4-L3A-DAY12-LeThanhTung-2A202602499-CloudServicesAndDeployment |
 
